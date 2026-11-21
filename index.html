@@ -127,7 +127,7 @@ create policy "jajan milik sendiri" on jajan
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
 2. Authentication > Users > Add user (isi email + password kamu).
-(Update kolom pelunasan, jalankan sekali:  alter table jajan add column if not exists pelunasan bigint not null default 0;)
+(Update kolom pelunasan, jalankan sekali:  alter table jajan add column if not exists pelunasan boolean not null default false;)
 3. Isi SUPABASE_URL dan SUPABASE_ANON_KEY di bawah (Project Settings > API).
 =====================================================================
 -->
@@ -191,7 +191,7 @@ create policy "jajan milik sendiri" on jajan
     <div><label for="f_order">Order dimana</label><input id="f_order" placeholder="JO / GO / langsung"></div>
     <div><label for="f_harga">Est. harga bersih ina (Rp)</label><input id="f_harga" type="number" min="0" inputmode="numeric" value="0"></div>
     <div><label for="f_dp">DP (Rp)</label><input id="f_dp" type="number" min="0" inputmode="numeric" value="0"></div>
-    <div><label for="f_pelunasan">Pelunasan (Rp)</label><input id="f_pelunasan" type="number" min="0" inputmode="numeric" value="0"></div>
+    <div><label for="f_pelunasan">Pelunasan</label><select id="f_pelunasan"><option value="false">Belum</option><option value="true">Done pelunasan</option></select></div>
     <div><label for="f_status">Status barang</label>
   <select id="f_status">
     <option>Menunggu</option>
@@ -272,14 +272,15 @@ function gambar(){
   const aktif = data.filter(r => r.status !== "Refund");
   const total = aktif.reduce((a,r) => a + Number(r.harga_bersih), 0);
   const dp = aktif.reduce((a,r) => a + Number(r.dp), 0);
-  const lunas = aktif.reduce((a,r) => a + (Number(r.pelunasan) || 0), 0);
+  const lunas = aktif.filter(r => r.pelunasan).length;
+  const sisaTotal = aktif.reduce((a,r) => a + (r.pelunasan ? 0 : Number(r.harga_bersih) - Number(r.dp)), 0);
   const arrived = data.filter(r => r.status === "Arrived").length;
   const refund = data.filter(r => r.status === "Refund").length;
   $("stats").innerHTML =
     `<div class="stat"><small>Total jajan</small><strong>${rupiah(total)}</strong></div>` +
     `<div class="stat b"><small>Total DP</small><strong>${rupiah(dp)}</strong></div>` +
-    `<div class="stat b"><small>Total pelunasan</small><strong>${rupiah(lunas)}</strong></div>` +
-    `<div class="stat"><small>Sisa bayar</small><strong>${rupiah(total - dp - lunas)}</strong></div>` +
+    `<div class="stat"><small>Sisa bayar</small><strong>${rupiah(sisaTotal)}</strong></div>` +
+    `<div class="stat g"><small>Sudah pelunasan</small><strong>${lunas} barang</strong></div>` +
     `<div class="stat g"><small>Sudah arrived</small><strong>${arrived} barang</strong></div>` +
     `<div class="stat b"><small>Kena refund</small><strong>${refund} barang</strong></div>`;
 
@@ -295,8 +296,8 @@ function gambar(){
       <td>${esc(r.web_order)}</td>
       <td class="num">${rupiah(r.harga_bersih)}</td>
       <td class="num">${rupiah(r.dp)}</td>
-      <td class="num">${rupiah(Number(r.pelunasan) || 0)}</td>
-      <td class="num">${rupiah(Number(r.harga_bersih) - Number(r.dp) - (Number(r.pelunasan) || 0))}</td>
+      <td class="chk"><input type="checkbox" class="tick" data-lunas="${r.id}" ${r.pelunasan?"checked":""} ${r.status==="Refund"?"disabled":""} aria-label="Done pelunasan"></td>
+      <td class="num">${rupiah(r.pelunasan ? 0 : Number(r.harga_bersih) - Number(r.dp))}</td>
       <td>${esc(r.order_dimana)}</td>
       <td><span class="badge ${bk}">${esc(r.status)}</span></td>
       <td class="aksi"><button class="edit" data-edit="${r.id}">Edit</button><button data-del="${r.id}">Hapus</button></td>
@@ -307,6 +308,13 @@ $("cari").oninput = gambar;
 $("filterStatus").onchange = gambar;
 
 $("rows").addEventListener("change", async e => {
+  const lid = e.target.dataset.lunas;
+  if (lid){
+    const { error } = await db.from("jajan").update({ pelunasan: e.target.checked }).eq("id", lid);
+    if (error){ alert("Gagal update: " + error.message); return; }
+    muat();
+    return;
+  }
   const id = e.target.dataset.id;
   if (!id) return;
   const status = e.target.checked ? "Arrived" : "Menunggu";
@@ -336,7 +344,7 @@ function bukaForm(r){
   $("f_order").value = r ? (r.order_dimana || "") : "";
   $("f_harga").value = r ? r.harga_bersih : 0;
   $("f_dp").value = r ? r.dp : 0;
-  $("f_pelunasan").value = r ? (r.pelunasan || 0) : 0;
+  $("f_pelunasan").value = r && r.pelunasan ? "true" : "false";
   $("f_status").value = r ? r.status : "Menunggu";
   $("dlgError").textContent = "";
   $("dlg").showModal();
@@ -354,7 +362,7 @@ $("btnSimpan").onclick = async () => {
     order_dimana: $("f_order").value.trim(),
     harga_bersih: Math.max(0, parseInt($("f_harga").value) || 0),
     dp: Math.max(0, parseInt($("f_dp").value) || 0),
-    pelunasan: Math.max(0, parseInt($("f_pelunasan").value) || 0),
+    pelunasan: $("f_pelunasan").value === "true",
     status: $("f_status").value
   };
   const id = $("f_id").value;
