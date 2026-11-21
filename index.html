@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>REKAP JAJAN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --merah:#a3121f;
+  --merah-tua:#6e0b14;
+  --merah-terang:#d6212f;
+  --hijau:#2f6b3f;
+  --hijau-muda:#cfe8d3;
+  --coklat:#5a3a2a;
+  --coklat-muda:#e9d9cc;
+  --kertas:#fff6f1;
+  --stabilo-merah:#ff8a93;
+  --stabilo-hijau:#a8e6b4;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  font-family:'Nunito',system-ui,sans-serif;
+  background:var(--merah-tua);
+  background-image:radial-gradient(circle at 20% 0%,var(--merah) 0,transparent 55%);
+  color:var(--coklat);
+  min-height:100vh;
+}
+h1,h2{font-family:'DM Serif Display',Georgia,serif;font-weight:400;margin:0}
+button,input,select{font:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--hijau-muda);outline-offset:2px}
+.hidden{display:none!important}
+
+/* ---------- LOGIN ---------- */
+#login{min-height:100vh;display:grid;place-items:center;padding:20px}
+.login-card{background:var(--kertas);border-radius:20px;padding:32px 26px;width:100%;max-width:360px;box-shadow:0 10px 0 var(--coklat)}
+.login-card h1{font-size:2.3rem;color:var(--merah);text-align:center;letter-spacing:.02em}
+.login-card p.sub{text-align:center;margin:6px 0 22px;color:var(--hijau);font-weight:700}
+label{display:block;font-weight:800;font-size:.85rem;margin:12px 0 4px}
+input,select{width:100%;padding:11px 12px;border:2px solid var(--coklat);border-radius:10px;background:#fff;color:var(--coklat)}
+input:focus,select:focus{border-color:var(--merah)}
+.btn{border:0;border-radius:12px;padding:12px 18px;font-weight:800;background:var(--merah);color:#fff}
+.btn:hover{background:var(--merah-terang)}
+.btn.hijau{background:var(--hijau)}
+.btn.polos{background:transparent;color:var(--coklat);border:2px solid var(--coklat)}
+.btn.block{width:100%;margin-top:18px}
+.error{color:var(--merah);font-weight:700;margin-top:12px;min-height:1.2em;font-size:.9rem}
+
+/* ---------- APP ---------- */
+header.top{padding:22px 18px 8px;max-width:1200px;margin:0 auto;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+header.top h1{font-size:clamp(2.2rem,7vw,3.6rem);color:#fff;line-height:1;letter-spacing:.03em}
+header.top .who{color:var(--coklat-muda);font-size:.85rem;font-weight:700}
+header.top .who button{margin-left:8px;padding:6px 12px;font-size:.8rem}
+main{max-width:1200px;margin:0 auto;padding:10px 18px 60px}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+.stat{background:var(--kertas);border-radius:14px;padding:12px 14px;border-left:8px solid var(--merah)}
+.stat.g{border-left-color:var(--hijau)}
+.stat.b{border-left-color:var(--coklat)}
+.stat small{display:block;font-weight:700;color:var(--coklat);opacity:.8}
+.stat strong{font-size:1.25rem;color:var(--merah-tua)}
+
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px}
+.tools input{flex:1 1 200px;width:auto}
+.tools select{flex:0 0 auto;width:auto}
+.tools .btn{background:var(--hijau)}
+
+.tablewrap{background:var(--kertas);border-radius:16px;overflow-x:auto;box-shadow:0 8px 0 var(--coklat)}
+table{border-collapse:collapse;width:100%;min-width:980px}
+th{background:var(--merah);color:#fff;text-align:left;padding:11px 10px;font-size:.85rem;white-space:nowrap;position:sticky;top:0}
+td{padding:10px;border-bottom:1px solid var(--coklat-muda);vertical-align:middle;font-size:.92rem}
+td.num{text-align:right;white-space:nowrap}
+td.chk{text-align:center;width:54px}
+tr.arrived td{background:var(--stabilo-hijau)}
+tr.refund td{background:var(--stabilo-merah)}
+tr.refund td.nama,tr.refund td.num{text-decoration:line-through;text-decoration-thickness:2px}
+.nama{font-weight:800;min-width:160px}
+.badge{display:inline-block;padding:3px 10px;border-radius:99px;font-weight:800;font-size:.78rem;background:var(--coklat-muda);color:var(--coklat);white-space:nowrap}
+.badge.arrived{background:var(--hijau);color:#fff}
+.badge.refund{background:var(--merah-tua);color:#fff}
+.badge.dikirim{background:var(--coklat);color:#fff}
+input[type=checkbox].tick{appearance:none;width:26px;height:26px;border:3px solid var(--hijau);border-radius:8px;background:#fff;padding:0;display:inline-grid;place-content:center;cursor:pointer}
+input[type=checkbox].tick:checked{background:var(--hijau)}
+input[type=checkbox].tick:checked::after{content:"✓";color:#fff;font-weight:800;font-size:16px;line-height:1}
+.aksi button{border:0;background:transparent;font-weight:800;color:var(--merah);padding:4px 6px}
+.aksi button.edit{color:var(--hijau)}
+.kosong{text-align:center;padding:40px 16px;font-weight:700}
+
+.fab{position:fixed;right:18px;bottom:18px;z-index:5;border-radius:99px;padding:14px 22px;box-shadow:0 5px 0 var(--merah-tua);background:var(--hijau);color:#fff;border:0;font-weight:800}
+
+dialog{border:0;border-radius:18px;padding:22px;width:min(94vw,520px);background:var(--kertas);color:var(--coklat);box-shadow:0 10px 0 var(--coklat)}
+dialog::backdrop{background:rgba(60,0,6,.7)}
+dialog h2{color:var(--merah);font-size:1.6rem;margin-bottom:6px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+.row-btn{display:flex;gap:10px;margin-top:18px}
+.row-btn .btn{flex:1}
+@media (max-width:480px){.grid2{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<!--
+==================== SETUP SUPABASE (sekali aja) ====================
+1. Di Supabase project "rekap" > SQL Editor > New query, jalankan:
+
+create table if not exists jajan (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
+  nama_merch text not null,
+  qty int not null default 1,
+  variasi text,
+  web_order text,
+  harga_bersih bigint not null default 0,
+  dp bigint not null default 0,
+  order_dimana text,
+  status text not null default 'Menunggu',
+  created_at timestamptz not null default now()
+);
+alter table jajan enable row level security;
+create policy "jajan milik sendiri" on jajan
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+2. Authentication > Users > Add user (isi email + password kamu).
+3. Isi SUPABASE_URL dan SUPABASE_ANON_KEY di bawah (Project Settings > API).
+=====================================================================
+-->
+
+<section id="login">
+  <div class="login-card">
+    <h1>REKAP JAJAN</h1>
+    <p class="sub">masuk dulu ya</p>
+    <label for="email">Email</label>
+    <input id="email" type="email" autocomplete="email" placeholder="email kamu">
+    <label for="password">Password</label>
+    <input id="password" type="password" autocomplete="current-password" placeholder="password">
+    <button class="btn block" id="btnLogin">Masuk</button>
+    <div class="error" id="loginError" role="alert"></div>
+  </div>
+</section>
+
+<section id="app" class="hidden">
+  <header class="top">
+    <h1>REKAP JAJAN</h1>
+    <div class="who"><span id="whoEmail"></span><button class="btn polos" id="btnLogout" style="color:#fff;border-color:#fff">Keluar</button></div>
+  </header>
+  <main>
+    <div class="stats" id="stats"></div>
+    <div class="tools">
+      <input id="cari" type="search" placeholder="Cari merch, web order, atau tempat order">
+      <select id="filterStatus" aria-label="Filter status">
+        <option value="">Semua status</option>
+        <option>Menunggu</option>
+        <option>Dikirim</option>
+        <option>Arrived</option>
+        <option>Refund</option>
+      </select>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Arrived</th><th>Nama merch</th><th>Qty</th><th>Variasi</th><th>Web order</th>
+            <th>Est. harga bersih ina</th><th>DP</th><th>Sisa</th><th>Order dimana</th><th>Status</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <div class="kosong hidden" id="kosong">Belum ada jajanan. Tekan “Tambah jajan” untuk mulai.</div>
+    </div>
+  </main>
+  <button class="fab" id="btnTambah">+ Tambah jajan</button>
+</section>
+
+<dialog id="dlg">
+  <h2 id="dlgTitle">Tambah jajan</h2>
+  <input type="hidden" id="f_id">
+  <label for="f_nama">Nama merch</label>
+  <input id="f_nama" placeholder="contoh: album, photocard, fankit">
+  <div class="grid2">
+    <div><label for="f_qty">Qty</label><input id="f_qty" type="number" min="1" value="1" inputmode="numeric"></div>
+    <div><label for="f_variasi">Variasi</label><input id="f_variasi" placeholder="versi / member"></div>
+    <div><label for="f_web">Web order</label><input id="f_web" placeholder="nama web / link"></div>
+    <div><label for="f_order">Order dimana</label><input id="f_order" placeholder="JO / GO / langsung"></div>
+    <div><label for="f_harga">Est. harga bersih ina (Rp)</label><input id="f_harga" type="number" min="0" inputmode="numeric" value="0"></div>
+    <div><label for="f_dp">DP (Rp)</label><input id="f_dp" type="number" min="0" inputmode="numeric" value="0"></div>
+  </div>
+  <label for="f_status">Status barang</label>
+  <select id="f_status">
+    <option>Menunggu</option>
+    <option>Dikirim</option>
+    <option>Arrived</option>
+    <option>Refund</option>
+  </select>
+  <div class="error" id="dlgError" role="alert"></div>
+  <div class="row-btn">
+    <button class="btn polos" id="btnBatal" type="button">Batal</button>
+    <button class="btn" id="btnSimpan" type="button">Simpan</button>
+  </div>
+</dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.js"></script>
+<script>
+// ====== ISI DUA INI DARI SUPABASE (Project Settings > API) ======
+const SUPABASE_URL = "https://govombkhujewdwxiikdj.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_hUC3eDm9PW6nyKkImFZR_g_NL0T3pZp";
+// ================================================================
+
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const $ = id => document.getElementById(id);
+const rupiah = n => "Rp " + new Intl.NumberFormat("id-ID").format(Number(n) || 0);
+let data = [];
+
+function esc(s){
+  return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+/* ---------- auth ---------- */
+async function cekSesi(){
+  const { data:{ session } } = await db.auth.getSession();
+  if (session) masuk(session.user); else keluarUI();
+}
+function masuk(user){
+  $("login").classList.add("hidden");
+  $("app").classList.remove("hidden");
+  $("whoEmail").textContent = user.email;
+  muat();
+}
+function keluarUI(){
+  $("app").classList.add("hidden");
+  $("login").classList.remove("hidden");
+}
+$("btnLogin").onclick = async () => {
+  $("loginError").textContent = "";
+  const email = $("email").value.trim(), password = $("password").value;
+  if (!email || !password){ $("loginError").textContent = "Isi email dan password dulu."; return; }
+  $("btnLogin").disabled = true;
+  const { data:d, error } = await db.auth.signInWithPassword({ email, password });
+  $("btnLogin").disabled = false;
+  if (error){ $("loginError").textContent = "Email atau password salah."; return; }
+  masuk(d.user);
+};
+$("password").addEventListener("keydown", e => { if (e.key === "Enter") $("btnLogin").click(); });
+$("btnLogout").onclick = async () => { await db.auth.signOut(); data = []; keluarUI(); };
+
+/* ---------- data ---------- */
+async function muat(){
+  const { data:d, error } = await db.from("jajan").select("*").order("created_at", { ascending:false });
+  if (error){ alert("Gagal memuat data: " + error.message); return; }
+  data = d || [];
+  gambar();
+}
+
+function gambar(){
+  const q = $("cari").value.trim().toLowerCase();
+  const fs = $("filterStatus").value;
+  const list = data.filter(r =>
+    (!fs || r.status === fs) &&
+    (!q || [r.nama_merch, r.web_order, r.order_dimana, r.variasi].join(" ").toLowerCase().includes(q))
+  );
+
+  // ringkasan (refund tidak dihitung ke total jajan)
+  const aktif = data.filter(r => r.status !== "Refund");
+  const total = aktif.reduce((a,r) => a + Number(r.harga_bersih), 0);
+  const dp = aktif.reduce((a,r) => a + Number(r.dp), 0);
+  const arrived = data.filter(r => r.status === "Arrived").length;
+  const refund = data.filter(r => r.status === "Refund").length;
+  $("stats").innerHTML =
+    `<div class="stat"><small>Total jajan</small><strong>${rupiah(total)}</strong></div>` +
+    `<div class="stat b"><small>Total DP</small><strong>${rupiah(dp)}</strong></div>` +
+    `<div class="stat"><small>Sisa bayar</small><strong>${rupiah(total - dp)}</strong></div>` +
+    `<div class="stat g"><small>Sudah arrived</small><strong>${arrived} barang</strong></div>` +
+    `<div class="stat b"><small>Kena refund</small><strong>${refund} barang</strong></div>`;
+
+  $("kosong").classList.toggle("hidden", list.length > 0);
+  $("rows").innerHTML = list.map(r => {
+    const kls = r.status === "Arrived" ? "arrived" : r.status === "Refund" ? "refund" : "";
+    const bk = r.status === "Arrived" ? "arrived" : r.status === "Refund" ? "refund" : r.status === "Dikirim" ? "dikirim" : "";
+    return `<tr class="${kls}">
+      <td class="chk"><input type="checkbox" class="tick" data-id="${r.id}" ${r.status==="Arrived"?"checked":""} ${r.status==="Refund"?"disabled":""} aria-label="Sudah arrived"></td>
+      <td class="nama">${esc(r.nama_merch)}</td>
+      <td class="num">${esc(r.qty)}</td>
+      <td>${esc(r.variasi)}</td>
+      <td>${esc(r.web_order)}</td>
+      <td class="num">${rupiah(r.harga_bersih)}</td>
+      <td class="num">${rupiah(r.dp)}</td>
+      <td class="num">${rupiah(Number(r.harga_bersih) - Number(r.dp))}</td>
+      <td>${esc(r.order_dimana)}</td>
+      <td><span class="badge ${bk}">${esc(r.status)}</span></td>
+      <td class="aksi"><button class="edit" data-edit="${r.id}">Edit</button><button data-del="${r.id}">Hapus</button></td>
+    </tr>`;
+  }).join("");
+}
+$("cari").oninput = gambar;
+$("filterStatus").onchange = gambar;
+
+$("rows").addEventListener("change", async e => {
+  const id = e.target.dataset.id;
+  if (!id) return;
+  const status = e.target.checked ? "Arrived" : "Menunggu";
+  const { error } = await db.from("jajan").update({ status }).eq("id", id);
+  if (error){ alert("Gagal update: " + error.message); return; }
+  muat();
+});
+$("rows").addEventListener("click", async e => {
+  const ed = e.target.dataset.edit, del = e.target.dataset.del;
+  if (ed) bukaForm(data.find(r => r.id === ed));
+  if (del){
+    if (!confirm("Hapus jajan ini dari rekapan?")) return;
+    const { error } = await db.from("jajan").delete().eq("id", del);
+    if (error){ alert("Gagal hapus: " + error.message); return; }
+    muat();
+  }
+});
+
+/* ---------- form tambah / edit ---------- */
+function bukaForm(r){
+  $("dlgTitle").textContent = r ? "Edit jajan" : "Tambah jajan";
+  $("f_id").value = r ? r.id : "";
+  $("f_nama").value = r ? r.nama_merch : "";
+  $("f_qty").value = r ? r.qty : 1;
+  $("f_variasi").value = r ? (r.variasi || "") : "";
+  $("f_web").value = r ? (r.web_order || "") : "";
+  $("f_order").value = r ? (r.order_dimana || "") : "";
+  $("f_harga").value = r ? r.harga_bersih : 0;
+  $("f_dp").value = r ? r.dp : 0;
+  $("f_status").value = r ? r.status : "Menunggu";
+  $("dlgError").textContent = "";
+  $("dlg").showModal();
+}
+$("btnTambah").onclick = () => bukaForm(null);
+$("btnBatal").onclick = () => $("dlg").close();
+$("btnSimpan").onclick = async () => {
+  const nama = $("f_nama").value.trim();
+  if (!nama){ $("dlgError").textContent = "Nama merch wajib diisi."; return; }
+  const row = {
+    nama_merch: nama,
+    qty: Math.max(1, parseInt($("f_qty").value) || 1),
+    variasi: $("f_variasi").value.trim(),
+    web_order: $("f_web").value.trim(),
+    order_dimana: $("f_order").value.trim(),
+    harga_bersih: Math.max(0, parseInt($("f_harga").value) || 0),
+    dp: Math.max(0, parseInt($("f_dp").value) || 0),
+    status: $("f_status").value
+  };
+  const id = $("f_id").value;
+  $("btnSimpan").disabled = true;
+  const { error } = id
+    ? await db.from("jajan").update(row).eq("id", id)
+    : await db.from("jajan").insert(row);
+  $("btnSimpan").disabled = false;
+  if (error){ $("dlgError").textContent = "Gagal menyimpan: " + error.message; return; }
+  $("dlg").close();
+  muat();
+};
+
+cekSesi();
+</script>
+</body>
+</html>
