@@ -83,6 +83,7 @@ tr.refund td.nama,tr.refund td.num{text-decoration:line-through;text-decoration-
 .badge.arrived{background:var(--hijau);color:#fff}
 .badge.refund{background:var(--merah-tua);color:#fff}
 .badge.dikirim{background:var(--coklat);color:#fff}
+.badge.wh{background:var(--hijau-muda);color:var(--hijau);border:2px solid var(--hijau)}
 input[type=checkbox].tick{appearance:none;width:26px;height:26px;border:3px solid var(--hijau);border-radius:8px;background:#fff;padding:0;display:inline-grid;place-content:center;cursor:pointer}
 input[type=checkbox].tick:checked{background:var(--hijau)}
 input[type=checkbox].tick:checked::after{content:"✓";color:#fff;font-weight:800;font-size:16px;line-height:1}
@@ -155,6 +156,7 @@ create policy "jajan milik sendiri" on jajan
       <select id="filterStatus" aria-label="Filter status">
         <option value="">Semua status</option>
         <option>Menunggu</option>
+        <option>Shipping WH</option>
         <option>Dikirim</option>
         <option>Arrived</option>
         <option>Refund</option>
@@ -192,6 +194,7 @@ create policy "jajan milik sendiri" on jajan
   <label for="f_status">Status barang</label>
   <select id="f_status">
     <option>Menunggu</option>
+    <option>Shipping WH</option>
     <option>Dikirim</option>
     <option>Arrived</option>
     <option>Refund</option>
@@ -279,7 +282,7 @@ function gambar(){
   $("kosong").classList.toggle("hidden", list.length > 0);
   $("rows").innerHTML = list.map(r => {
     const kls = r.status === "Arrived" ? "arrived" : r.status === "Refund" ? "refund" : "";
-    const bk = r.status === "Arrived" ? "arrived" : r.status === "Refund" ? "refund" : r.status === "Dikirim" ? "dikirim" : "";
+    const bk = r.status === "Arrived" ? "arrived" : r.status === "Refund" ? "refund" : r.status === "Dikirim" ? "dikirim" : r.status === "Shipping WH" ? "wh" : "";
     return `<tr class="${kls}">
       <td class="chk"><input type="checkbox" class="tick" data-id="${r.id}" ${r.status==="Arrived"?"checked":""} ${r.status==="Refund"?"disabled":""} aria-label="Sudah arrived"></td>
       <td class="nama">${esc(r.nama_merch)}</td>
