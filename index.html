@@ -70,7 +70,7 @@ main{max-width:1200px;margin:0 auto;padding:10px 18px 60px}
 .tools .btn{background:var(--hijau)}
 
 .tablewrap{background:var(--kertas);border-radius:16px;overflow-x:auto;box-shadow:0 8px 0 var(--coklat)}
-table{border-collapse:collapse;width:100%;min-width:980px}
+table{border-collapse:collapse;width:100%;min-width:1080px}
 th{background:var(--merah);color:#fff;text-align:left;padding:11px 10px;font-size:.85rem;white-space:nowrap;position:sticky;top:0}
 td{padding:10px;border-bottom:1px solid var(--coklat-muda);vertical-align:middle;font-size:.92rem}
 td.num{text-align:right;white-space:nowrap}
@@ -127,6 +127,7 @@ create policy "jajan milik sendiri" on jajan
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
 2. Authentication > Users > Add user (isi email + password kamu).
+(Update kolom pelunasan, jalankan sekali:  alter table jajan add column if not exists pelunasan bigint not null default 0;)
 3. Isi SUPABASE_URL dan SUPABASE_ANON_KEY di bawah (Project Settings > API).
 =====================================================================
 -->
@@ -167,7 +168,7 @@ create policy "jajan milik sendiri" on jajan
         <thead>
           <tr>
             <th>Arrived</th><th>Nama merch</th><th>Qty</th><th>Variasi</th><th>Web order</th>
-            <th>Est. harga bersih ina</th><th>DP</th><th>Sisa</th><th>Order dimana</th><th>Status</th><th></th>
+            <th>Est. harga bersih ina</th><th>DP</th><th>Pelunasan</th><th>Sisa</th><th>Order dimana</th><th>Status</th><th></th>
           </tr>
         </thead>
         <tbody id="rows"></tbody>
@@ -190,15 +191,16 @@ create policy "jajan milik sendiri" on jajan
     <div><label for="f_order">Order dimana</label><input id="f_order" placeholder="JO / GO / langsung"></div>
     <div><label for="f_harga">Est. harga bersih ina (Rp)</label><input id="f_harga" type="number" min="0" inputmode="numeric" value="0"></div>
     <div><label for="f_dp">DP (Rp)</label><input id="f_dp" type="number" min="0" inputmode="numeric" value="0"></div>
-  </div>
-  <label for="f_status">Status barang</label>
+    <div><label for="f_pelunasan">Pelunasan (Rp)</label><input id="f_pelunasan" type="number" min="0" inputmode="numeric" value="0"></div>
+    <div><label for="f_status">Status barang</label>
   <select id="f_status">
     <option>Menunggu</option>
     <option>Shipping WH</option>
     <option>Dikirim</option>
     <option>Arrived</option>
     <option>Refund</option>
-  </select>
+  </select></div>
+  </div>
   <div class="error" id="dlgError" role="alert"></div>
   <div class="row-btn">
     <button class="btn polos" id="btnBatal" type="button">Batal</button>
@@ -270,12 +272,14 @@ function gambar(){
   const aktif = data.filter(r => r.status !== "Refund");
   const total = aktif.reduce((a,r) => a + Number(r.harga_bersih), 0);
   const dp = aktif.reduce((a,r) => a + Number(r.dp), 0);
+  const lunas = aktif.reduce((a,r) => a + (Number(r.pelunasan) || 0), 0);
   const arrived = data.filter(r => r.status === "Arrived").length;
   const refund = data.filter(r => r.status === "Refund").length;
   $("stats").innerHTML =
     `<div class="stat"><small>Total jajan</small><strong>${rupiah(total)}</strong></div>` +
     `<div class="stat b"><small>Total DP</small><strong>${rupiah(dp)}</strong></div>` +
-    `<div class="stat"><small>Sisa bayar</small><strong>${rupiah(total - dp)}</strong></div>` +
+    `<div class="stat b"><small>Total pelunasan</small><strong>${rupiah(lunas)}</strong></div>` +
+    `<div class="stat"><small>Sisa bayar</small><strong>${rupiah(total - dp - lunas)}</strong></div>` +
     `<div class="stat g"><small>Sudah arrived</small><strong>${arrived} barang</strong></div>` +
     `<div class="stat b"><small>Kena refund</small><strong>${refund} barang</strong></div>`;
 
@@ -291,7 +295,8 @@ function gambar(){
       <td>${esc(r.web_order)}</td>
       <td class="num">${rupiah(r.harga_bersih)}</td>
       <td class="num">${rupiah(r.dp)}</td>
-      <td class="num">${rupiah(Number(r.harga_bersih) - Number(r.dp))}</td>
+      <td class="num">${rupiah(Number(r.pelunasan) || 0)}</td>
+      <td class="num">${rupiah(Number(r.harga_bersih) - Number(r.dp) - (Number(r.pelunasan) || 0))}</td>
       <td>${esc(r.order_dimana)}</td>
       <td><span class="badge ${bk}">${esc(r.status)}</span></td>
       <td class="aksi"><button class="edit" data-edit="${r.id}">Edit</button><button data-del="${r.id}">Hapus</button></td>
@@ -331,6 +336,7 @@ function bukaForm(r){
   $("f_order").value = r ? (r.order_dimana || "") : "";
   $("f_harga").value = r ? r.harga_bersih : 0;
   $("f_dp").value = r ? r.dp : 0;
+  $("f_pelunasan").value = r ? (r.pelunasan || 0) : 0;
   $("f_status").value = r ? r.status : "Menunggu";
   $("dlgError").textContent = "";
   $("dlg").showModal();
@@ -348,6 +354,7 @@ $("btnSimpan").onclick = async () => {
     order_dimana: $("f_order").value.trim(),
     harga_bersih: Math.max(0, parseInt($("f_harga").value) || 0),
     dp: Math.max(0, parseInt($("f_dp").value) || 0),
+    pelunasan: Math.max(0, parseInt($("f_pelunasan").value) || 0),
     status: $("f_status").value
   };
   const id = $("f_id").value;
